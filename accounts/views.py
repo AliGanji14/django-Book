@@ -13,3 +13,27 @@ class SignUpView(generic.CreateView):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
