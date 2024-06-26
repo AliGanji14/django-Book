@@ -1,15 +1,14 @@
 from django.views import generic
 from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import redirect
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.decorators import login_required
 
-from .models import Book, Comment
+from .models import Book
 from .forms import CommentForm
 
 
 class BookListView(generic.ListView):
-    model = Book
+    queryset = Book.objects.all().order_by('-datetime_created')
     template_name = 'books/book_list.html'
     paginate_by = 4
     context_object_name = 'books'
