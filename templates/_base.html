@@ -18,11 +18,11 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-info" dir="rtl">
     <div class="container">
-        <a class="navbar-brand">
+        <a href="{% url 'home' %}" class="navbar-brand">
             <img src="{% static 'icons/book.png' %}" alt="" height="30"
-                 class="d-inline-block align-text-top" >
+                 class="d-inline-block align-text-top">
         </a>
-        <a class="navbar-brand mx-3" href="{% url 'book_list' %}">کتاب یار</a>
+        <a class="navbar-brand mx-3" href="{% url 'home' %}">کتاب یار</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
                 aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -35,12 +35,13 @@
         </div>
         <div class="mx-2 text-white">
             {% if user.is_authenticated %}
-                خوش آمدی {{ user.username }} | <a class="link-light text-decoration-none" href="#">
-                <form action="{% url 'logout' %}" method="post">
+                خوش آمدی {{ user.username }} |
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit">خروج</button>
+                    <button type="submit" class="btn btn-link link-light text-decoration-none p-0 m-0"
+                            style="display: inline; border: none; background: none;">خروج
+                    </button>
                 </form>
-            </a>
             {% else %}
                 <a class="link-light text-decoration-none" href="{% url 'login' %}">ورود</a>
                 <span> یا </span>

@@ -14,7 +14,7 @@ class BookListView(generic.ListView):
     context_object_name = 'books'
 
 
-@login_required()
+@login_required
 def book_detail_view(request, pk):
     book = get_object_or_404(Book, pk=pk)
     book_comments = book.comments.all()
