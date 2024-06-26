@@ -1,4 +1,4 @@
-{% extends "_base.html" %}
+    {% extends "_base.html" %}
 
 {% load crispy_forms_tags %}
 
@@ -70,7 +70,7 @@
                         <h3>نظر خود را وارد کنید:</h3>
                         <form method="POST">
                             {% csrf_token %}
-                            {{ comment_form|crispy }}
+                            {{ form|crispy }}
                             <button class="btn btn-primary" type="submit">ارسال</button>
                         </form>
                     </div>

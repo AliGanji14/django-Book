@@ -1,8 +1,9 @@
 from django.views import generic
 from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
+
 from .models import Book, Comment
 from .forms import CommentForm
 
@@ -14,36 +15,32 @@ class BookListView(generic.ListView):
     context_object_name = 'books'
 
 
-@login_required
-def book_detail_view(request, pk):
-    book = get_object_or_404(Book, pk=pk)
-    book_comments = book.comments.all()
-
-    if request.method == 'POST':
-        comment_form = CommentForm(request.POST)
-        if comment_form.is_valid():
-            new_comment = comment_form.save(commit=False)
-            new_comment.book = book
-            new_comment.user = request.user
-            new_comment.save()
-            comment_form = CommentForm()
-    else:
-        comment_form = CommentForm()
-    return render(request, 'books/book_detail.html', {
-        'book': book,
-        'comments': book_comments,
-        'comment_form': comment_form})
-
-
-class BookCreateView(LoginRequiredMixin, generic.CreateView):
+class BookDetailView(LoginRequiredMixin, generic.DeleteView):
     model = Book
-    fields = ['title', 'author', 'description', 'price', 'cover']
-    template_name = 'books/book_create.html'
+    template_name = 'books/book_detail.html'
+    context_object_name = 'book'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = CommentForm()
+        context['comments'] = self.object.comments.all()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.book = self.object
+            comment.user = request.user
+            comment.save()
+            return redirect('book_detail', pk=self.object.pk)
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 class BookUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView):
     model = Book
-    fields = ['title', 'author', 'description', 'price', 'cover']
+    fields = ('title', 'author', 'description', 'price', 'cover')
     template_name = 'books/book_update.html'
 
     def test_func(self):
@@ -51,7 +48,7 @@ class BookUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView
         return obj.user == self.request.user
 
 
-class BookDeleteView(LoginRequiredMixin,UserPassesTestMixin, generic.DeleteView):
+class BookDeleteView(LoginRequiredMixin, UserPassesTestMixin, generic.DeleteView):
     model = Book
     template_name = 'books/book_delete.html'
     success_url = reverse_lazy('book_list')
@@ -59,3 +56,13 @@ class BookDeleteView(LoginRequiredMixin,UserPassesTestMixin, generic.DeleteView)
     def test_func(self):
         obj = self.get_object()
         return obj.user == self.request.user
+
+
+class BookCreateView(LoginRequiredMixin, generic.CreateView):
+    model = Book
+    fields = ('title', 'author', 'description', 'price', 'cover')
+    template_name = 'books/book_create.html'
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
